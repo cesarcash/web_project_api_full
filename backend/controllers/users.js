@@ -35,32 +35,63 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
-module.exports.updateProfile = (req, res) => {
-  const userId = req.user._id;
+// module.exports.updateProfile = (req, res) => {
+//   const userId = req.user._id;
 
-  const { name, about } = req.body;
+//   const { name, about } = req.body;
 
-  if (!name || !about) {
-    return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
-  }
+//   if (!name || !about) {
+//     return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+//   }
 
-  User.findByIdAndUpdate(userId, { name, about }, { new: true })
-    .orFail(() => {
-      const error = new Error(`No se encontró el usuario con el ID ${userId} `);
+//   User.findByIdAndUpdate(userId, { name, about }, { new: true })
+//     .orFail(() => {
+//       const error = new Error(`No se encontró el usuario con el ID ${userId} `);
+//       error.statusCode = HttpStatus.NOT_FOUND;
+//       throw error;
+//     })
+//     .then((user) => res.status(HttpStatus.OK).send({ data: user }))
+//     .catch((err) => {
+//       if (err.statusCode === HttpStatus.NOT_FOUND) {
+//         return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
+//       }
+//       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+//     });
+// };
+
+module.exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, about } = req.body;
+    if (!name || !about) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+    }
+
+    const user = await User.findById(userId).orFail(() => {
+      const error = new Error('No se encontro el usuario');
       error.statusCode = HttpStatus.NOT_FOUND;
       throw error;
-    })
-    .then((user) => res.status(HttpStatus.OK).send({ data: user }))
-    .catch((err) => {
-      if (err.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
+
+    if (user._id.toString() === userId.toString()) {
+      const updateUser = await User.findByIdAndUpdate(userId, { name, about }, { new: true });
+      res.status(HttpStatus.OK).send({ data: updateUser });
+    } else {
+      res.status(HttpStatus.UNAUTHORIZED).send({ message: HttpResponseMessage.UNAUTHORIZED });
+    }
+  } catch (err) {
+    if (err.statusCode === HttpStatus.NOT_FOUND) {
+      return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
+    }
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
 };
 
 module.exports.getUser = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(HttpStatus.UNAUTHORIZED).send({ message: HttpResponseMessage.UNAUTHORIZED });
+    }
     const userId = req.user._id;
     const user = await User.findById(userId);
     if (!user) {
@@ -96,20 +127,43 @@ module.exports.updateAvatar = (req, res) => {
     });
 };
 
+// module.exports.login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     if (!email || !password) {
+//       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
+//     }
+//     const user = await User.findUserByCredentials(email, password);
+//     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secreto', { expiresIn: '7d' });
+
+//     res.status(HttpStatus.OK).send({ token });
+//   } catch (err) {
+//     if (err.statusCode === HttpStatus.UNAUTHORIZED) {
+//       return res.status(err.statusCode).send({ message: err.message });
+//     }
+//     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+//       message: err.message || HttpResponseMessage.INTERNAL_SERVER_ERROR,
+//     });
+//   }
+// };
+
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
     }
-    const user = await User.findUserByCredentials(email, password);
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+    }
+    const matched = await bcrypt.compare(password, user.password);
+    if (!matched) {
+      return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+    }
     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secreto', { expiresIn: '7d' });
-
     res.status(HttpStatus.OK).send({ token });
   } catch (err) {
-    if (err.statusCode === HttpStatus.UNAUTHORIZED) {
-      return res.status(err.statusCode).send({ message: err.message });
-    }
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
       message: err.message || HttpResponseMessage.INTERNAL_SERVER_ERROR,
     });

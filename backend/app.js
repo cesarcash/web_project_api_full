@@ -49,13 +49,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6743cb8d08a4cb3a371e4732',
-  };
-  next();
-});
-
 app.use('/users', auth, usersRoute);
 
 app.use('/cards', auth, cardRoute);
@@ -76,9 +69,9 @@ app.use('/', (req, res) => {
   res.status(HttpStatus.NOT_FOUND).send(HttpResponseMessage.NOT_FOUND);
 });
 
-// app.use((err, req, res, next) => {
-
-// });
+app.use((err, req, res, next) => {
+  res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: HttpResponseMessage.SERVER_ERROR });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

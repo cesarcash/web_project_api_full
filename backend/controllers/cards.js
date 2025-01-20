@@ -24,23 +24,48 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  const { cardId } = req.params;
+// module.exports.deleteCard = (req, res) => {
+//   const { cardId } = req.params;
 
-  Cards.findById(cardId)
-    .orFail(() => {
-      const error = new Error('No se encontró la trajeta con el ID');
+//   Cards.findById(cardId)
+//     .orFail(() => {
+//       const error = new Error('No se encontró la trajeta con el ID');
+//       error.statusCode = HttpStatus.NOT_FOUND;
+//       throw error;
+//     })
+//     .then((card) => card.deleteOne())
+//     .then(() => res.status(HttpStatus.OK).send(HttpResponseMessage.SUCCESS))
+//     .catch((err) => {
+//       if (err.statusCode === HttpStatus.NOT_FOUND) {
+//         return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
+//       }
+//       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+//     });
+// };
+
+module.exports.deleteCard = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    if (!cardId) {
+      return res.status(HttpStatus.BAD_REQUEST).res.send({ message: HttpResponseMessage.BAD_REQUEST });
+    }
+    const card = await Cards.findById(cardId).orFail(() => {
+      const error = new Error('No se encontró la tarjeta con el ID');
       error.statusCode = HttpStatus.NOT_FOUND;
       throw error;
-    })
-    .then((card) => card.deleteOne())
-    .then(() => res.status(HttpStatus.OK).send(HttpResponseMessage.SUCCESS))
-    .catch((err) => {
-      if (err.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
+    if (req.user._id.toString() === card.owner._id.toString()) {
+      await card.deleteOne();
+      res.status(HttpStatus.OK).send(HttpResponseMessage.SUCCESS);
+    } else {
+      res.status(HttpStatus.UNAUTHORIZED).res.send({ message: HttpResponseMessage.UNAUTHORIZED });
+    }
+  } catch (err) {
+    if (err.statusCode === HttpStatus.NOT_FOUND) {
+      return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
+    }
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
 };
 
 module.exports.likeCard = (req, res) => {

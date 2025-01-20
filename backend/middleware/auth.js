@@ -4,7 +4,7 @@ const { HttpStatus, HttpResponseMessage } = require('../enums/http');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const handleAuthError = (res) => {
-  res.status(HttpStatus.UNAUTHORIZED).send({ message: HttpResponseMessage.UNAUTHORIZED });
+  res.status(HttpStatus.FORBIDDEN).send({ message: HttpResponseMessage.FORBIDDEN });
 };
 
 module.exports = (req, res, next) => {
