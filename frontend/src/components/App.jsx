@@ -28,6 +28,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isInfoTooltipOpen, setInfoTooltip] = useState(false); 
     const [messageModal, setMessageModal] = useState({isOk: '', message: ''});
+    const [apiToken, setApiToken] = useState(null);
 
     const navigate = useNavigate();
     
@@ -77,6 +78,7 @@ function App() {
         fetchInitialCards()
 
         const token = getToken();
+        console.log("🚀 ~ useEffect ~ token:", token)
 
         if(token){
             fetchLoginUser()
@@ -200,6 +202,7 @@ function App() {
         try {
 
             const data = await auth.signin({email,password});
+            console.log("🚀 ~ handleLogin ~ data:", data)
             if(data.token){
                 setToken(data.token);
                 setUserData({email});

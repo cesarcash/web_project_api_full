@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
+const cors = require('cors');
 const usersRoute = require('./routes/users');
 const cardRoute = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
@@ -29,6 +30,8 @@ mongoose.connect('mongodb://localhost:27017/aroundb')
 
 app.use(express.json());
 app.use(errors());
+app.use(cors());
+app.options('*', cors());
 
 app.use((req, res, next) => {
   const { origin } = req.headers;
