@@ -1,0 +1,60 @@
+@import './page.css';
+
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login__container {
+    padding: 60px 0 80px;
+    max-inline-size: 358px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login__title {
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 29px;
+    margin-bottom: 50px;
+}
+
+.login__input {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    background: #000;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 13px 0;
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+    margin-bottom: 30px;
+}
+
+.login__button {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 186px 0 15px;
+    background-color: #fff;
+    border: none;
+    padding: 14px 0;
+    font-size: 18px;
+    color: #000;
+    font-weight: 400;
+}
+
+.login__paragraph {
+    font-size: 14px;
+    line-height: 17px;
+}
+
+.login__paragraph_link {
+    color: #fff;
+    text-decoration: none;
+}

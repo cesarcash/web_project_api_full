@@ -1,0 +1,11 @@
+.card__delete-button_visible {
+    display: block;
+}
+
+.card__delete-button_hidden {
+    display: none;
+}
+
+.card__like-button-visible {
+    background-image: url('../images/icon__like-active.svg');
+}

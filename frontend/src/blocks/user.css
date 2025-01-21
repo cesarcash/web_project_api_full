@@ -1,0 +1,128 @@
+.user {
+    display: flex;
+    flex-direction: column;
+    padding: 42px 19px 36px;
+    align-items: center;
+    transition: .3s ease-in all;
+}
+
+.user__picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 14px;
+    position: relative;
+    background-size: cover;
+}
+
+.user__picture:hover {
+    cursor: pointer;
+}
+
+.user__picture_edit {
+    position: absolute;
+    background-color: rgba(0,0,0,.8);
+    background-image: url('../images/edit__profile.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-clip: padding-box;
+    inset: 0;
+    display: none;
+    transition: .5s ease-in all;
+}
+
+.user__picture:hover .user__picture_edit {
+    display: block;
+}
+
+.user__photo {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.user__data {
+    text-align: center;
+    margin-bottom: 36px;
+    flex-grow: 1;
+}
+
+.user__data-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.user__name-profile {
+    margin: 0;
+    font-family: 'Inter Medium';
+    font-size: 22px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 201px;    
+}
+
+.user__name-description {
+    margin: 14px auto 0 auto;
+    font-family: 'Inter Regular';
+    font-size: 14px;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100px;
+    width: 100%;
+}
+
+.user__action {
+    width: 100%;
+    text-align: center;    
+}
+
+@media screen and (min-width: 1280px){
+
+    .user {
+        flex-direction: row;
+        padding: 40px 0px 50px;
+
+    }
+
+    .user__picture {
+        margin: 0 30px 0 0;
+    }
+
+    .user__data {
+        margin-bottom: 0;
+        text-align: initial;
+    }
+
+    .user__data-row {
+        justify-content: flex-start;
+        gap: 17px;
+    }
+
+    .user__name-profile {
+        font-size: 42px;
+        line-height: 56px;
+        max-width: 372px;
+        width: 100%;
+    }
+
+    .user__name-description {
+        margin: 15px 0 0 0;
+        font-size: 18px;
+        max-width: 372px;
+        width: 100%;
+    }
+
+    .user__action {
+        flex: 1;
+        text-align: right;
+    }
+
+}
