@@ -52,10 +52,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/users', auth, usersRoute);
-
-app.use('/cards', auth, cardRoute);
-
 app.post('/signin', login);
 
 app.post('/signup', celebrate({
@@ -67,6 +63,12 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(5),
   }),
 }), createUser);
+
+app.use(auth);
+
+app.use('/users', usersRoute);
+
+app.use('/cards', cardRoute);
 
 app.use('/', (req, res) => {
   res.status(HttpStatus.NOT_FOUND).send(HttpResponseMessage.NOT_FOUND);

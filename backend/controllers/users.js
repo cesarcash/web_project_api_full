@@ -2,12 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { HttpStatus, HttpResponseMessage } = require('../enums/http');
+require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res) => {
-  console.log('Controlador ejecutado:', req.params);
-
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((error) => {
@@ -34,30 +33,6 @@ module.exports.getUserById = (req, res) => {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
     });
 };
-
-// module.exports.updateProfile = (req, res) => {
-//   const userId = req.user._id;
-
-//   const { name, about } = req.body;
-
-//   if (!name || !about) {
-//     return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
-//   }
-
-//   User.findByIdAndUpdate(userId, { name, about }, { new: true })
-//     .orFail(() => {
-//       const error = new Error(`No se encontró el usuario con el ID ${userId} `);
-//       error.statusCode = HttpStatus.NOT_FOUND;
-//       throw error;
-//     })
-//     .then((user) => res.status(HttpStatus.OK).send({ data: user }))
-//     .catch((err) => {
-//       if (err.statusCode === HttpStatus.NOT_FOUND) {
-//         return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-//       }
-//       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
-//     });
-// };
 
 module.exports.updateProfile = async (req, res) => {
   try {
@@ -126,26 +101,6 @@ module.exports.updateAvatar = (req, res) => {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
-
-// module.exports.login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     if (!email || !password) {
-//       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
-//     }
-//     const user = await User.findUserByCredentials(email, password);
-//     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secreto', { expiresIn: '7d' });
-
-//     res.status(HttpStatus.OK).send({ token });
-//   } catch (err) {
-//     if (err.statusCode === HttpStatus.UNAUTHORIZED) {
-//       return res.status(err.statusCode).send({ message: err.message });
-//     }
-//     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-//       message: err.message || HttpResponseMessage.INTERNAL_SERVER_ERROR,
-//     });
-//   }
-// };
 
 module.exports.login = async (req, res) => {
   try {
