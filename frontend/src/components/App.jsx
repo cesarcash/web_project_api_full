@@ -28,7 +28,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isInfoTooltipOpen, setInfoTooltip] = useState(false); 
     const [messageModal, setMessageModal] = useState({isOk: '', message: ''});
-    const [apiToken, setApiToken] = useState(null);
+    const [apiToken, setApiToken] = useState(getToken() || '');
 
     const navigate = useNavigate();
     
@@ -64,7 +64,8 @@ function App() {
 
                 const user = await auth.getUserInfo();
                 setIsLoggedIn(true)
-                setUserData({email: user.data.email})
+                // setUserData({email: user.data.email})
+                setUserData({email: user.email})
                 navigate('/');
 
             }catch(err) {
@@ -78,14 +79,13 @@ function App() {
         fetchInitialCards()
 
         const token = getToken();
-        console.log("🚀 ~ useEffect ~ token:", token)
 
         if(token){
+            setApiToken(token);
             fetchLoginUser()
         }
         
     },[])
-    
 
     function handleCardLike(card){
 
@@ -93,7 +93,8 @@ function App() {
 
         api.changeLikeCardStatus(card._id, !isLiked)
         .then((newCard) => {
-            setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+            // setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+            setCards((state) => state.map((c) => c.data._id === card._id ? newCard : c));
         });
 
     }
@@ -142,7 +143,8 @@ function App() {
         try{
 
             const user = await api.setUserInfo(data) 
-            setCurrentUser(user)
+            // setCurrentUser(user)
+            setCurrentUser(user.data)
             closeAllPopups();
 
         }catch(error){
@@ -156,7 +158,8 @@ function App() {
         try{
 
             const avatar = await api.editImgUser(data)
-            setCurrentUser(avatar);
+            // setCurrentUser(avatar);
+            setCurrentUser(avatar.data);
             closeAllPopups();
 
         }catch(error){
@@ -170,7 +173,8 @@ function App() {
         try{
 
             const newCard = await api.setNewCard(data)
-            setCards([newCard, ...cards])
+            // setCards([newCard, ...cards])
+            setCards([newCard.data, ...cards])
             closeAllPopups();
 
         }catch(error){
@@ -202,8 +206,8 @@ function App() {
         try {
 
             const data = await auth.signin({email,password});
-            console.log("🚀 ~ handleLogin ~ data:", data)
             if(data.token){
+                setApiToken(data.token);
                 setToken(data.token);
                 setUserData({email});
                 setIsLoggedIn(true);

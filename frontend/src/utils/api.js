@@ -1,4 +1,4 @@
-import {ApiConfigHeaders, API_URL} from './constants';
+import {AuthConfigHeaders, API_URL} from './constants';
 
 class Api {
 
@@ -34,7 +34,7 @@ class Api {
 
     getInitialCards(){
 
-        return this._makeRequest('/cards');        
+        return this._makeRequest('/cards');
 
     }
 
@@ -79,9 +79,9 @@ class Api {
 
 const api = new Api({
     headers: {
-        accept: ApiConfigHeaders.accept,
-        type: ApiConfigHeaders.type,
-        authorization: ApiConfigHeaders.token
+        accept: AuthConfigHeaders.accept,
+        type: AuthConfigHeaders.type,
+        authorization: AuthConfigHeaders.token
     },
     url: API_URL
 });

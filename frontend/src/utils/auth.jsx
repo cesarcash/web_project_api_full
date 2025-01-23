@@ -1,4 +1,4 @@
-import { AuthConfigHeaders, BASE_URL } from "./constants";
+import { AuthConfigHeaders, API_URL } from "./constants";
 
 class Api {
 
@@ -56,7 +56,7 @@ const auth = new Api({
         type: AuthConfigHeaders.type,
         authorization: AuthConfigHeaders.token
     },
-    url: BASE_URL
+    url: API_URL
 })
 
 export default auth;
