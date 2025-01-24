@@ -1,4 +1,6 @@
-import { AuthConfigHeaders, API_URL } from "./constants";
+import { ApiConfigHeaders, API_URL } from "./constants";
+import { getToken } from "./token";
+
 
 class Api {
 
@@ -15,8 +17,12 @@ class Api {
         }
 
         if(body){
-            options.headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(body);
+        }
+
+        const token = getToken();
+        if(token){
+            options.headers['authorization'] = `Bearer ${token}`;
         }
 
         try {
@@ -52,9 +58,7 @@ class Api {
 
 const auth = new Api({
     headers: {
-        accept: AuthConfigHeaders.accept,
-        type: AuthConfigHeaders.type,
-        authorization: AuthConfigHeaders.token
+        ...ApiConfigHeaders,
     },
     url: API_URL
 })
