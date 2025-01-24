@@ -127,18 +127,14 @@ module.exports.login = async (req, res) => {
 
 module.exports.createUser = async (req, res) => {
   try {
-    const {
-      name, about, avatar, email, password,
-    } = req.body;
+    const { email, password } = req.body;
 
-    if (!name || !about || !avatar || !email || !password) {
+    if (!email || !password) {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      name, about, avatar, email, password: hash,
-    });
+    const user = await User.create({ email, password: hash });
 
     res.status(HttpStatus.CREATED).send({ data: { _id: user._id, email: user.email } });
   } catch (e) {

@@ -32,6 +32,7 @@ app.use(express.json());
 app.use(errors());
 app.use(cors());
 app.options('*', cors());
+app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   const { origin } = req.headers;
