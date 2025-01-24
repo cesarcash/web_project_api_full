@@ -20,7 +20,8 @@ const DEFAULT_ALLOWED_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'
 const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/aroundb')
+// mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
+mongoose.connect('mongodb+srv://cesarcash5:cesarcash123@cluster0.tk29m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => {
     console.log('Connected to mongoDB');
   })
@@ -71,9 +72,9 @@ app.use('/users', usersRoute);
 
 app.use('/cards', cardRoute);
 
-app.use('/', (req, res) => {
-  res.status(HttpStatus.NOT_FOUND).send(HttpResponseMessage.NOT_FOUND);
-});
+// app.use('/', (req, res) => {
+//   res.status(HttpStatus.NOT_FOUND).send(HttpResponseMessage.NOT_FOUND);
+// });
 
 app.use((err, req, res, next) => {
   res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: HttpResponseMessage.SERVER_ERROR });

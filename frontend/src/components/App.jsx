@@ -75,15 +75,17 @@ function App() {
 
         }
 
-        fetchUserInfo()
-        fetchInitialCards()
-
+        
         const token = getToken();
-
+        
         if(token){
+            fetchUserInfo()
+            fetchInitialCards()
             setApiToken(token);
             fetchLoginUser()
         }
+
+        
         
     },[])
 
