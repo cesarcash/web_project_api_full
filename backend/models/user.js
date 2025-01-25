@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator(v) {
-        return /^(https?:\/\/)(www\.)?[\w-]+(\.[\w-]+)+([\/._~:/?%#[\]@!$&'()*+,;=0-9-]*)?(#.*)?$/.test(v);
+        return /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/.test(v);
       },
       message: (props) => `${props.value} Invalid avatar URL`,
     },

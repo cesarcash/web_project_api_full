@@ -50,7 +50,7 @@ function App() {
         const fetchUserInfo = async () => {
             
             try {
-                const userInfo = await api.getInfoUser();
+                const userInfo = await api.getUserInfo();
                 setCurrentUser(userInfo);
             } catch(error) {
                 console.error(`Error ${error}`);
@@ -74,7 +74,6 @@ function App() {
             }
 
         }
-
         
         const token = getToken();
         
@@ -84,8 +83,6 @@ function App() {
             setApiToken(token);
             fetchLoginUser()
         }
-
-        
         
     },[])
 
@@ -248,7 +245,7 @@ function App() {
 
                 <Route path="/" element={
                     
-                    currentUser ? (
+                    // currentUser ? (
 
                         <ProtectedRoute isLoggedIn={isLoggedIn}>
 
@@ -288,7 +285,7 @@ function App() {
 
                         </ProtectedRoute>
 
-                    ) : ''
+                    // ) : ''
 
                 } />
 

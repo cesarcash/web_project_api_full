@@ -43,7 +43,7 @@ class Api {
 
     }
 
-    getInfoUser(){
+    getUserInfo(){
 
         return this._makeRequest('/users/me')
         
