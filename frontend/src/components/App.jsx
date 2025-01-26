@@ -51,6 +51,7 @@ function App() {
             
             try {
                 const userInfo = await api.getUserInfo();
+                console.log("🚀 ~ fetchUserInfo ~ userInfo:", userInfo)
                 setCurrentUser(userInfo);
             } catch(error) {
                 console.error(`Error ${error}`);
@@ -84,16 +85,14 @@ function App() {
             fetchLoginUser()
         }
         
-    },[])
+    },[apiToken])
 
     function handleCardLike(card){
-
         const isLiked = card.likes.some(i => i._id === currentUser._id);
 
         api.changeLikeCardStatus(card._id, !isLiked)
         .then((newCard) => {
-            // setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-            setCards((state) => state.map((c) => c.data._id === card._id ? newCard : c));
+            setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
         });
 
     }

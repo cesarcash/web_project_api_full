@@ -6,12 +6,12 @@ const {
 
 router.get('/', getUsers);
 
-router.get('/:userId', getUserById);
-
 router.patch('/me', updateProfile);
 
 router.patch('/me/avatar', updateAvatar);
 
-router.get('/users/me', getUser);
+router.get('/me', getUser);
+
+router.get('/:userId', getUserById);
 
 module.exports = router;

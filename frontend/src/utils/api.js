@@ -68,7 +68,7 @@ class Api {
     }
 
     changeLikeCardStatus(idCard,isLiked){
-
+        
         const method = (isLiked) ? 'PUT' : 'DELETE';
         return this._makeRequest(`/cards/likes/${idCard}`,method)
 

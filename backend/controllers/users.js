@@ -72,7 +72,9 @@ module.exports.getUser = async (req, res) => {
     if (!user) {
       return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
     }
-    res.status(HttpStatus.OK).send({ email: user.email });
+    res.status(HttpStatus.OK).send({
+      email: user.email, name: user.name, about: user.about, avatar: user.avatar,
+    });
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: HttpResponseMessage.SERVER_ERROR });
   }

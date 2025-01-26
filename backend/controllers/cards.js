@@ -78,7 +78,8 @@ module.exports.likeCard = (req, res) => {
       error.statusCode = HttpStatus.NOT_FOUND;
       throw error;
     })
-    .then((card) => res.status(HttpStatus.OK).send({ data: card }))
+    // .then((card) => res.status(HttpStatus.OK).send({ data: card }))
+    .then((card) => res.status(HttpStatus.OK).send(card))
     .catch((err) => {
       if (err.statusCode === HttpStatus.NOT_FOUND) {
         return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
@@ -97,7 +98,7 @@ module.exports.dislikeCard = (req, res) => {
       error.statusCode = HttpStatus.NOT_FOUND;
       throw error;
     })
-    .then((card) => res.status(HttpStatus.OK).send({ data: card }))
+    .then((card) => res.status(HttpStatus.OK).send(card))
     .catch((err) => {
       if (err.statusCode === HttpStatus.NOT_FOUND) {
         return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
