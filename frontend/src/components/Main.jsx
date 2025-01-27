@@ -7,7 +7,6 @@ import Card from './Card';
 import CurrentUserContext from '../contexts/CurrentUserContext';
 
 function Main(props){
-    console.log("🚀 ~ Main ~ props:", props.cards)
 
     const currentUser = useContext(CurrentUserContext);
 

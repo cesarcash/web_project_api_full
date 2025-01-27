@@ -2,137 +2,127 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { HttpStatus, HttpResponseMessage } = require('../enums/http');
+const AuthError = require('../middleware/errors/AuthError');
+const BadRequestError = require('../middleware/errors/BadRequestError');
+const NotFoundError = require('../middleware/errors/NotFoundError');
+
 require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => {
+      if (users.length === 0) {
+        throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
+      }
+      res.send({ data: users });
+    })
     .catch((error) => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
+      next(error);
     });
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
     .orFail(() => {
-      const error = new Error('No se encontró el usuario con el ID');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })
     .then((user) => {
       res.status(HttpStatus.OK).send({ data: user });
     })
     .catch((error) => {
-      if (error.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(error.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
+      next(error);
     });
 };
 
-module.exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { name, about } = req.body;
     if (!name || !about) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+      throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
     }
 
-    const user = await User.findById(userId).orFail(() => {
-      const error = new Error('No se encontro el usuario');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+    const updateUser = await User.findByIdAndUpdate(userId, { name, about }, { new: true }).orFail(() => {
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     });
-
-    if (user._id.toString() === userId.toString()) {
-      const updateUser = await User.findByIdAndUpdate(userId, { name, about }, { new: true });
-      res.status(HttpStatus.OK).send({ data: updateUser });
-    } else {
-      res.status(HttpStatus.UNAUTHORIZED).send({ message: HttpResponseMessage.UNAUTHORIZED });
-    }
+    res.status(HttpStatus.OK).send({ data: updateUser });
   } catch (err) {
-    if (err.statusCode === HttpStatus.NOT_FOUND) {
-      return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-    }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+    next(err);
   }
 };
 
-module.exports.getUser = async (req, res) => {
+module.exports.getUser = async (req, res, next) => {
   try {
     if (!req.user) {
-      return res.status(HttpStatus.UNAUTHORIZED).send({ message: HttpResponseMessage.UNAUTHORIZED });
+      throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
     const userId = req.user._id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     }
     res.status(HttpStatus.OK).send({
       email: user.email, name: user.name, about: user.about, avatar: user.avatar,
     });
   } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: HttpResponseMessage.SERVER_ERROR });
+    next(err);
   }
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const userId = req.user._id;
 
   const { avatar } = req.body;
 
   if (!avatar) {
-    return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+    throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
   }
 
   User.findByIdAndUpdate(userId, { avatar }, { new: true })
     .orFail(() => {
-      const error = new Error('No se encontró el usuario con el ID ');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })
     .then((user) => res.status(HttpStatus.OK).send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+      next(err);
     });
 };
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
+      // return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
+      throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
     }
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+      // return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+      throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+      // return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
+      throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secreto', { expiresIn: '7d' });
     res.status(HttpStatus.OK).send({ token });
   } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-      message: err.message || HttpResponseMessage.INTERNAL_SERVER_ERROR,
-    });
+    next(err);
   }
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+      // return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+      throw new AuthError(HttpResponseMessage.BAD_REQUEST);
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -140,6 +130,7 @@ module.exports.createUser = async (req, res) => {
 
     res.status(HttpStatus.CREATED).send({ data: { _id: user._id, email: user.email } });
   } catch (e) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
+    // res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
+    next(e);
   }
 };

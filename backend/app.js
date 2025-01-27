@@ -72,12 +72,12 @@ app.use('/users', usersRoute);
 
 app.use('/cards', cardRoute);
 
-// app.use('/', (req, res) => {
-//   res.status(HttpStatus.NOT_FOUND).send(HttpResponseMessage.NOT_FOUND);
-// });
-
 app.use((err, req, res, next) => {
-  res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: HttpResponseMessage.SERVER_ERROR });
+  console.log('🚀 ~ app.use ~ err:', err);
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? HttpResponseMessage.SERVER_ERROR : message,
+  });
 });
 
 app.listen(PORT, () => {
