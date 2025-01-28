@@ -11,12 +11,12 @@ const { requestLogger, errorLogger } = require('./middleware/logger');
 
 const { HttpResponseMessage } = require('./enums/http');
 
-const allowedCors = [
-  'https://cesarcash.chickenkiller.com',
-  'http://cesarcash.chickenkiller.com',
-  'http://localhost:3000',
-];
-const DEFAULT_ALLOWED_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'];
+// const allowedCors = [
+//   'https://cesarcash.chickenkiller.com',
+//   'http://cesarcash.chickenkiller.com',
+//   'http://localhost:3000',
+// ];
+// const DEFAULT_ALLOWED_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'];
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -33,26 +33,26 @@ mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
 app.use(express.json());
 app.use(cors());
 app.options('*', cors());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  const { origin } = req.headers;
-  const { method } = req;
+// app.use((req, res, next) => {
+//   const { origin } = req.headers;
+//   const { method } = req;
 
-  if (allowedCors.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+//   if (allowedCors.includes(origin)) {
+//     res.header('Access-Control-Allow-Origin', origin);
+//   }
 
-  const requestHeaders = req.headers['access-control-request-headers'];
+//   const requestHeaders = req.headers['access-control-request-headers'];
 
-  if (method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS.join(','));
-    res.header('Access-Control-Allow-Headers', requestHeaders);
-    return res.end();
-  }
+//   if (method === 'OPTIONS') {
+//     res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS.join(','));
+//     res.header('Access-Control-Allow-Headers', requestHeaders);
+//     return res.end();
+//   }
 
-  next();
-});
+//   next();
+// });
 
 app.use(requestLogger);
 
