@@ -1,14 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-const { celebrate, Joi } = require('celebrate');
 const cors = require('cors');
 const usersRoute = require('./routes/users');
 const cardRoute = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
+const { validateRegister, validateLogin } = require('./middleware/validations');
+const { requestLogger, errorLogger } = require('./middleware/logger');
 
-const { HttpStatus, HttpResponseMessage } = require('./enums/http');
+const { HttpResponseMessage } = require('./enums/http');
 
 const allowedCors = [
   'https://cesarcash.chickenkiller.com',
@@ -20,8 +21,8 @@ const DEFAULT_ALLOWED_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'
 const { PORT = 3000 } = process.env;
 const app = express();
 
-// mongoose.connect('mongodb+srv://cesarcash5:cesarcash123@cluster0.tk29m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
+// mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
+mongoose.connect('mongodb+srv://cesarcash5:cesarcash123@cluster0.tk29m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => {
     console.log('Connected to mongoDB');
   })
@@ -30,7 +31,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
   });
 
 app.use(express.json());
-app.use(errors());
 app.use(cors());
 app.options('*', cors());
 app.use(express.urlencoded({ extended: true }));
@@ -54,17 +54,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/signin', login);
+app.use(requestLogger);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri(),
-    email: Joi.string().email().required(),
-    password: Joi.string().required().min(5),
-  }),
-}), createUser);
+app.post('/signin', validateLogin, login);
+
+app.post('/signup', validateRegister, createUser);
 
 app.use(auth);
 
@@ -72,8 +66,11 @@ app.use('/users', usersRoute);
 
 app.use('/cards', cardRoute);
 
+app.use(errorLogger);
+
+app.use(errors());
+
 app.use((err, req, res, next) => {
-  console.log('🚀 ~ app.use ~ err:', err);
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({
     message: statusCode === 500 ? HttpResponseMessage.SERVER_ERROR : message,

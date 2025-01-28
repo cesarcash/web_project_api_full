@@ -96,17 +96,14 @@ module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      // return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Email and password are required' });
       throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
     }
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      // return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
       throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      // return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Email and password incorrect' });
       throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secreto', { expiresIn: '7d' });
@@ -121,7 +118,6 @@ module.exports.createUser = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      // return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
       throw new AuthError(HttpResponseMessage.BAD_REQUEST);
     }
 
@@ -130,7 +126,6 @@ module.exports.createUser = async (req, res, next) => {
 
     res.status(HttpStatus.CREATED).send({ data: { _id: user._id, email: user.email } });
   } catch (e) {
-    // res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
     next(e);
   }
 };

@@ -1,108 +1,77 @@
 const Cards = require('../models/card');
 const { HttpStatus, HttpResponseMessage } = require('../enums/http');
+const AuthError = require('../middleware/errors/AuthError');
+const BadRequestError = require('../middleware/errors/BadRequestError');
+const NotFoundError = require('../middleware/errors/NotFoundError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .then((cards) => res.send(cards))
     .catch((error) => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
+      next(error);
     });
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
   const { name, link } = req.body;
 
   if (!name || !link) {
-    return res.status(HttpStatus.BAD_REQUEST).send({ message: HttpResponseMessage.BAD_REQUEST });
+    throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
   }
 
   Cards.create({ name, link, owner })
     .then((card) => res.status(HttpStatus.CREATED).send({ data: card }))
     .catch((error) => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
+      next(error);
     });
 };
 
-// module.exports.deleteCard = (req, res) => {
-//   const { cardId } = req.params;
-
-//   Cards.findById(cardId)
-//     .orFail(() => {
-//       const error = new Error('No se encontró la trajeta con el ID');
-//       error.statusCode = HttpStatus.NOT_FOUND;
-//       throw error;
-//     })
-//     .then((card) => card.deleteOne())
-//     .then(() => res.status(HttpStatus.OK).send(HttpResponseMessage.SUCCESS))
-//     .catch((err) => {
-//       if (err.statusCode === HttpStatus.NOT_FOUND) {
-//         return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-//       }
-//       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
-//     });
-// };
-
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   try {
     const { cardId } = req.params;
     if (!cardId) {
-      return res.status(HttpStatus.BAD_REQUEST).res.send({ message: HttpResponseMessage.BAD_REQUEST });
+      throw new BadRequestError(HttpResponseMessage.BAD_REQUEST);
     }
     const card = await Cards.findById(cardId).orFail(() => {
-      const error = new Error('No se encontró la tarjeta con el ID');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     });
     if (req.user._id.toString() === card.owner._id.toString()) {
       await card.deleteOne();
       res.status(HttpStatus.OK).send(HttpResponseMessage.SUCCESS);
     } else {
-      res.status(HttpStatus.UNAUTHORIZED).res.send({ message: HttpResponseMessage.UNAUTHORIZED });
+      throw new AuthError(HttpResponseMessage.UNAUTHORIZED);
     }
   } catch (err) {
-    if (err.statusCode === HttpStatus.NOT_FOUND) {
-      return res.status(err.statusCode).send({ message: HttpResponseMessage.NOT_FOUND });
-    }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+    next(err);
   }
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
   Cards.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .orFail(() => {
-      const error = new Error('La tarjeta con el ID ingresado no existe');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })
     // .then((card) => res.status(HttpStatus.OK).send({ data: card }))
     .then((card) => res.status(HttpStatus.OK).send(card))
     .catch((err) => {
-      if (err.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+      next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
   Cards.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .orFail(() => {
-      const error = new Error('Error al obtener la tarjeta con el ID ingresado');
-      error.statusCode = HttpStatus.NOT_FOUND;
-      throw error;
+      throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })
     .then((card) => res.status(HttpStatus.OK).send(card))
     .catch((err) => {
-      if (err.statusCode === HttpStatus.NOT_FOUND) {
-        return res.status(HttpStatus.NOT_FOUND).send({ message: HttpResponseMessage.NOT_FOUND });
-      }
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+      next(err);
     });
 };
