@@ -6,6 +6,7 @@ const NotFoundError = require('../middleware/errors/NotFoundError');
 
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
+    .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
     .catch((error) => {
       next(error);
@@ -21,9 +22,15 @@ module.exports.createCard = (req, res, next) => {
   }
 
   Cards.create({ name, link, owner })
-    .then((card) => res.status(HttpStatus.CREATED).send({ data: card }))
-    .catch((error) => {
-      next(error);
+    .then((card) => {
+      Cards.findById(card._id)
+        .populate(['owner', 'likes'])
+        .then((newCard) => {
+          res.status(HttpStatus.CREATED).send({ data: newCard });
+        });
+    })
+    .catch((err) => {
+      next(err);
     });
 };
 
@@ -51,7 +58,7 @@ module.exports.likeCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
-  Cards.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
+  Cards.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true }).populate(['owner', 'likes'])
     .orFail(() => {
       throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })
@@ -66,7 +73,7 @@ module.exports.dislikeCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
-  Cards.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
+  Cards.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true }).populate(['owner', 'likes'])
     .orFail(() => {
       throw new NotFoundError(HttpResponseMessage.NOT_FOUND);
     })

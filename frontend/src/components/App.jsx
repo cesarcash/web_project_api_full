@@ -39,6 +39,7 @@ function App() {
             try {
         
                 const cardsData = await api.getInitialCards();
+                console.log("🚀 ~ fetchInitialCards ~ cardsData:", cardsData)
                 setCards(cardsData)
         
             }catch(error){
