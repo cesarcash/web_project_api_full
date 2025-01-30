@@ -27,7 +27,7 @@ function App() {
     const [userData, setUserData] = useState({email: '', password: ''});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isInfoTooltipOpen, setInfoTooltip] = useState(false); 
-    const [messageModal, setMessageModal] = useState({isOk: '', message: ''});
+    const [messageModal, setMessageModal] = useState({});
     const [apiToken, setApiToken] = useState(getToken() || '');
 
     const navigate = useNavigate();
@@ -131,7 +131,7 @@ function App() {
         setAddPlace(false)
         setSelectedCard(null)
         setInfoTooltip(false)
-        setMessageModal({isOk: '', message: ''})
+        setMessageModal({})
 
     }
 
@@ -182,14 +182,15 @@ function App() {
 
     const handleRegistration = async ({email, password}) => { //registro
         
-        setInfoTooltip(true)
-
+        
         try {
             await auth.signup({email, password})
+            setInfoTooltip(true)
             setMessageModal({isOk: true, message: 'Te has registrado'})
         } catch (err){
             
             const errorMessage = err.statusCode === 400 ? 'Uno de los campos se rellenó de forma incorrecta' : `Unexpected Error: ${err.message}`;
+            setInfoTooltip(true)
             setMessageModal({isOk: false, message: errorMessage})
 
         }
