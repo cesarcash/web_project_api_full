@@ -28,7 +28,6 @@ class Api {
         try {
             
             const res = await fetch(`${this._url}${endpoint}`, options);
-            console.log('res',res)
             if(!res.ok) {
                 const error = new Error(`Error ${res.status}: ${res.statusText || 'Solicitud fallida'}`);
                 error.statusCode = res.status;
