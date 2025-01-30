@@ -12,3 +12,6 @@ Puntos principales del proyecto
 - Estructura de proyecto
 - Uso de rutas, modelos y controladores
 - Creación de base de datos en MongoDB
+- Generación de token para autenticación de usuarios
+- Frontend desarrollado con React
+- Protección de rutas en frontend
